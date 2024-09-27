@@ -17,6 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from api.views import UserModelViewSet, WarehouseModelViewSet, WarehouseCreateView, UserRegistrationView, UserLoginView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('register/', UserRegistrationView.as_view(), name='register'),
+    path('users/', UserModelViewSet.as_view({'get': 'list'}), name='user-list'),
+    path('login/', admin.site.urls, name='login'),
+    path('warehouses/', WarehouseModelViewSet.as_view({'get': 'list'}), name='warehouses'),
+    path('createwh/', WarehouseCreateView.as_view(), name='create_warehouse'),
 ]
