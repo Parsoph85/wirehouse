@@ -14,7 +14,7 @@ class Warehouse(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=128)
     quantity = models.PositiveIntegerField()
     warehouse = models.ForeignKey(Warehouse, related_name='products', on_delete=models.CASCADE)
 

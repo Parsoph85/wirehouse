@@ -1,29 +1,18 @@
-"""
-URL configuration for warehouse project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
 
-from api.views import UserModelViewSet, WarehouseModelViewSet, WarehouseCreateView, UserRegistrationView, UserLoginView
+from api.views import UserModelViewSet, WarehouseCreateView, UserRegistrationView, UserLoginView, \
+    ProductViewSet, ProductCreateView, ProductRetrieveView, WarehouseModelViewSet
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    #path('admin/', admin.site.urls),
+    path('', UserLoginView.as_view(), name='login'),
     path('register/', UserRegistrationView.as_view(), name='register'),
+    path('login/', UserLoginView.as_view(), name='login'),
     path('users/', UserModelViewSet.as_view({'get': 'list'}), name='user-list'),
-    path('login/', admin.site.urls, name='login'),
-    path('warehouses/', WarehouseModelViewSet.as_view({'get': 'list'}), name='warehouses'),
     path('createwh/', WarehouseCreateView.as_view(), name='create_warehouse'),
+    path('warehouses/', WarehouseModelViewSet.as_view({'get': 'list'}), name='warehouses-list'),
+    path('products/', ProductViewSet.as_view({'get': 'list'}), name='product-list'),
+    path('products/add/', ProductCreateView.as_view(), name='create_prod'),
+    path('products/take/<int:pk>/', ProductRetrieveView.as_view(), name='retriv_prod'),
 ]

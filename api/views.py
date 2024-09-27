@@ -1,11 +1,11 @@
-from rest_framework import viewsets, permissions, generics
-from rest_framework.generics import get_object_or_404
-from api.models import ApiUser, Warehouse
-from api.serializers import UserSerializer, WarehouseSerializer, ProductSerializer
+from rest_framework import viewsets, generics, permissions, serializers
+from api.models import ApiUser, Warehouse, Product
+from api.serializers import UserSerializer, WarehouseSerializer, ProductSerializer, LoginSerializer
 from rest_framework.response import Response
-from rest_framework.decorators import action
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+from api.permissions import IsSupply, IsConsumer
+
 
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -22,6 +22,9 @@ class UserModelViewSet(viewsets.ModelViewSet):
 
 
 class UserLoginView(generics.GenericAPIView):
+    queryset = ApiUser.objects.all()
+    serializer_class = LoginSerializer
+
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -36,16 +39,32 @@ class WarehouseModelViewSet(viewsets.ModelViewSet):
     queryset = Warehouse.objects.all()
     serializer_class = WarehouseSerializer
 
-    @action(detail=True)
-    def products(self, request, pk=None):
-        warehouse = get_object_or_404(Warehouse.objects.all(), id=pk)
-        prod_list = warehouse.product.filter(quantity__isnull=True)
-        return Response(
-            ProductSerializer(prod_list, many=True).data
-        )
-
 
 class WarehouseCreateView(generics.CreateAPIView):
     queryset = Warehouse.objects.all()
     serializer_class = WarehouseSerializer
+    permission_classes = [IsSupply]
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class ProductCreateView(generics.CreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsSupply]
+
+
+class ProductRetrieveView(generics.UpdateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsConsumer]
+
+    def perform_update(self, serializer):
+        quantity_to_retrieve = self.request.data.get('quantity')
+        if quantity_to_retrieve > serializer.instance.quantity:
+            raise serializers.ValidationError("Нельзя забрать больше, чем " + str(serializer.instance.quantity))
+        serializer.save(quantity=serializer.instance.quantity - quantity_to_retrieve)
