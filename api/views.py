@@ -7,7 +7,6 @@ from rest_framework.authtoken.models import Token
 from api.permissions import IsSupply, IsConsumer
 
 
-
 class UserRegistrationView(generics.CreateAPIView):
     queryset = ApiUser.objects.all()
     serializer_class = UserSerializer
